@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+yarn --cwd ./typescript dev:check
+yarn --cwd ./typescript dev:lint
+yarn --cwd ./typescript test --passWithNoTests
