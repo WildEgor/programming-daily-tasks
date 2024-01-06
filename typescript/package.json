@@ -8,7 +8,7 @@
     "commit": "git-cz",
     "prebuild": "rimraf dist",
     "prepare": "cd ../ && husky install",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\"",
     "start": "npx ts-node src/index.ts",
     "start:prod": "node dist/index",
     "dev:check": "tsc --noEmit --project tsconfig.json",

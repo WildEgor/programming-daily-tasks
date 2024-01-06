@@ -12,26 +12,20 @@
  * Input: str1 = "LEET", str2 = "CODE"
  * Output: ""
  */
-import * as readline from "readline";
-
-interface ISolutionAdapter {
-  (str1: string, str2: string): string
-}
 
 // Solution 1
 export function gcdOfStrings(str1: string, str2: string): string {
-  const EMPTY_STR = ""
+  const EMPTY_STR = '';
 
-  if (str1.length < 1 || str2.length > 1000) return EMPTY_STR
+  if (str1.length < 1 || str2.length > 1000) return EMPTY_STR;
 
-  if(str1.length > str2.length && str1.substring(0, str2.length) === str2)
+  if (str1.length > str2.length && str1.substring(0, str2.length) === str2)
     return gcdOfStrings(str1.slice(str2.length), str2);
-  else if(str1.length < str2.length && str2.substring(0, str1.length) === str1)
+  else if (str1.length < str2.length && str2.substring(0, str1.length) === str1)
     return gcdOfStrings(str1, str2.slice(str1.length));
-  else if(str1.length === str2.length && str1 === str2)
-    return str1;
+  else if (str1.length === str2.length && str1 === str2) return str1;
 
   return EMPTY_STR;
-};
+}
 
-export const solution: ISolutionAdapter = gcdOfStrings;
+export const solution = gcdOfStrings;

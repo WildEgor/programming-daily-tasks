@@ -4,13 +4,8 @@
  * Return the merged string.
  */
 
-interface ISolutionAdapter {
-  (word1: string, word2: string): string;
-}
-
 // Solution 1
 export function mergeAlternately(word1: string, word2: string): string {
-
   let result = '';
 
   if (word1.length > word2.length) {
@@ -30,6 +25,6 @@ export function mergeAlternately(word1: string, word2: string): string {
   }
 
   return result;
-};
+}
 
-export const solution: ISolutionAdapter = mergeAlternately;
+export const solution = mergeAlternately;
