@@ -13,14 +13,7 @@ func maxDepth(root *tree_node.TreeNode) int {
 		return 0
 	}
 
-	return 1 + Max(maxDepth(root.Left), maxDepth(root.Right))
-}
-
-func Max(x, y int) int {
-	if x < y {
-		return y
-	}
-	return x
+	return 1 + max(maxDepth(root.Left), maxDepth(root.Right))
 }
 
 func maxDepthAlt(root *tree_node.TreeNode) int {

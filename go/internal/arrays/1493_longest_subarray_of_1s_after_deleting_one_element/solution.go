@@ -13,7 +13,7 @@ func longestSubarray(nums []int) int {
 		if num == 1 {
 			currentMax++
 		} else {
-			result = Max(result, previousMax+currentMax)
+			result = max(result, previousMax+currentMax)
 			previousMax = currentMax
 			currentMax = 0
 		}
@@ -23,7 +23,7 @@ func longestSubarray(nums []int) int {
 		return currentMax - 1
 	}
 
-	return Max(result, previousMax+currentMax)
+	return max(result, previousMax+currentMax)
 }
 
 func longestSubarrayAlt(nums []int) int {
@@ -38,13 +38,6 @@ func longestSubarrayAlt(nums []int) int {
 		}
 	}
 	return ans
-}
-
-func Max(x, y int) int {
-	if x < y {
-		return y
-	}
-	return x
 }
 
 var Solution = longestSubarrayAlt

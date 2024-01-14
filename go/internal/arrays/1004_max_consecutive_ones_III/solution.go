@@ -6,7 +6,7 @@ package max_consecutive_ones_III
 */
 
 func longestOnes(nums []int, k int) int {
-	var max, left, right, count int
+	var m, left, right, count int
 
 	for right < len(nums) {
 		if nums[right] == 0 {
@@ -21,19 +21,12 @@ func longestOnes(nums []int, k int) int {
 			left++
 		}
 
-		max = Max(max, right-left+1)
+		m = max(m, right-left+1)
 
 		right++
 	}
 
-	return max
-}
-
-func Max(x, y int) int {
-	if x < y {
-		return y
-	}
-	return x
+	return m
 }
 
 var Solution = longestOnes
