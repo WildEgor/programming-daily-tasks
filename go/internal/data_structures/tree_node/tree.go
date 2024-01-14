@@ -28,6 +28,14 @@ func (n *TreeNode) Insert(val int) *TreeNode {
 	return n
 }
 
+func (n *TreeNode) ToList() []int {
+	if n == nil {
+		return []int{}
+	}
+
+	return append([]int{n.Val}, append(n.Left.ToList(), n.Right.ToList()...)...)
+}
+
 var NULL = -1 << 63
 
 func Ints2TreeNode(ints []int) *TreeNode {
