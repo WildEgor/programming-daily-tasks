@@ -15,8 +15,8 @@ func NewHeap[T cmp.Ordered](items []T) Heap[T] {
 	}
 }
 
-func (h *Heap[T]) GetMin() int {
-	return heap.Pop(h).(int)
+func (h *Heap[T]) GetMin() T {
+	return heap.Pop(h)
 }
 
 func (h *Heap[T]) Len() int {
