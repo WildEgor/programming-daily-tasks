@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	ms := make([]int, 0) // size 0, capacity 0
+	var ms []int
 
 	for i := 0; i < 10; i++ {
 		ms = append(ms, i)
