@@ -5,7 +5,18 @@ import (
 	"testing"
 )
 
-func Test_example_1(t *testing.T) {
-	example()
-	assert.Equal(t, true, true)
+var tsc = []struct {
+	input  int
+	output int
+}{
+	{
+		input:  1,
+		output: 1,
+	},
+}
+
+func Test_solution(t *testing.T) {
+	for _, test := range tsc {
+		assert.Equal(t, test.output, solution(test.input))
+	}
 }

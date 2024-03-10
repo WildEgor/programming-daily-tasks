@@ -1,6 +1,7 @@
 package template
 
-func example() {
+func solution(input int) int {
+	return input
 }
 
-var Solution = example
+var Solution = solution
