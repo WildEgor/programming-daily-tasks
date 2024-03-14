@@ -17,7 +17,7 @@ var tsc = []struct {
 
 func Test_check(t *testing.T) {
 	for _, test := range tsc {
-		result := check(test.input)
+		result := Solution(test.input)
 		if !reflect.DeepEqual(result, test.output) {
 			t.Errorf("expected: %v, got: %v", test.output, result)
 		}

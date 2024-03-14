@@ -1,7 +1,10 @@
 package ozon_5_http_check
 
 import (
+	"log"
 	"net/http"
+	"sync"
+	"time"
 )
 
 /**
@@ -10,26 +13,60 @@ import (
 @description: Дан массив URL-адресов. Ваша задача - отправить HTTP-запрос на каждый из них и вернуть массив строк, содержащий статус-коды ответов на запросы.
 */
 
-func check(urls []string) []string {
-	result := make([]string, 0)
-	for _, url := range urls {
-		func() {
-			r, err := http.Get(url)
-			defer r.Body.Close()
+type result struct {
+	url  string
+	code int
+}
 
-			if r == nil || err != nil {
-				result = append(result, url+" - not ok")
-				return
-			}
+func sendRequest(url string, wg *sync.WaitGroup, rCh chan<- result) {
+	defer wg.Done()
 
-			if r.StatusCode != http.StatusOK {
-				result = append(result, url+" - not ok")
-				return
-			}
-
-			result = append(result, url+" - ok")
-		}()
+	client := http.Client{
+		Timeout: 5 * time.Second,
 	}
 
-	return result
+	resp, err := client.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	rCh <- result{
+		url:  url,
+		code: resp.StatusCode,
+	}
 }
+
+func check(urls []string) []string {
+	// Edge case 1: empty input
+	if len(urls) == 0 {
+		return []string{}
+	}
+
+	wg := new(sync.WaitGroup)
+	rCh := make(chan result)
+
+	for _, url := range urls {
+		wg.Add(1)
+		go sendRequest(url, wg, rCh)
+	}
+
+	go func() {
+		wg.Wait()
+		close(rCh)
+	}()
+
+	data := make([]string, 0)
+
+	for r := range rCh {
+		if r.code == http.StatusOK {
+			data = append(data, r.url+" - ok")
+		} else {
+			data = append(data, r.url+" - not ok")
+		}
+	}
+
+	return data
+}
+
+var Solution = check
