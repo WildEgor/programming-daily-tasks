@@ -1,0 +1,1 @@
+TRUNCATE TABLE pickpoint_tariff
