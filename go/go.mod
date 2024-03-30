@@ -1,6 +1,6 @@
 module github.com/wildegor/daily_tasks/go
 
-go 1.21.3
+go 1.22.1
 
 require (
 	github.com/google/uuid v1.5.0
