@@ -5,6 +5,7 @@ go 1.22.1
 require (
 	github.com/google/uuid v1.5.0
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/text v0.14.0
 )
 
 require (
