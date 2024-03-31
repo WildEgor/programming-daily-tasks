@@ -1,6 +1,9 @@
 package main
 
-// TODO: write a program that implements rate limit based on a semaphore.
+import (
+	"fmt"
+	"time"
+)
 
 /*
 Напишите программу, которая реализует rate limit на основе семафора.
@@ -11,16 +14,56 @@ P.S. Да, семафор уже есть в golang встроенный. Его
 Она сложнее той, что предлагается написать вам.
 */
 
-type Semaphore chan struct{}
+type semType chan struct{}
 
-func NewSemaphore(n int) Semaphore {
-	return make(Semaphore, n)
+func NewSemaphore(n int) semType {
+	return make(semType, n)
 }
 
-func (s Semaphore) Acquire(n int) {
-
+func (s semType) Acquire(n int) {
+	for i := 0; i < n; i++ {
+		s <- struct{}{}
+	}
 }
 
-func (s Semaphore) Release(n int) {
-	// ваш код
+func (s semType) Release(n int) {
+	for i := 0; i < n; i++ {
+		<-s
+	}
+}
+
+const (
+	N      = 10
+	Total  = 20
+	Timout = 1 * time.Second
+)
+
+func process(id int) {
+	fmt.Printf("[%s]: running task %d\n", time.Now().Format("15:04:05"), id)
+	time.Sleep(Timout)
+}
+
+func main() {
+	sem := NewSemaphore(N)
+	done := make(chan bool)
+
+	for i := 1; i <= Total; i++ {
+		go func(v int) {
+			sem.Acquire(1)
+
+			go func() {
+				defer sem.Release(1)
+
+				process(v)
+
+				// Last task
+				if v == Total {
+					done <- true
+				}
+			}()
+
+		}(i)
+	}
+
+	<-done
 }
