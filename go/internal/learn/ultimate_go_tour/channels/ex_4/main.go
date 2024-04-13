@@ -71,7 +71,7 @@ func main() {
 		}
 	}
 
-	// Send the shutdown signal by closing the shutdown channel.
+	// NotifyUser the shutdown signal by closing the shutdown channel.
 	close(done)
 
 	// Wait for the Goroutines to finish.

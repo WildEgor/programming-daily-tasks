@@ -41,8 +41,8 @@ func main() {
 				return
 			}
 
-			// Send the odd values through the channel.
-			fmt.Printf("Send value %d\n", n)
+			// NotifyUser the odd values through the channel.
+			fmt.Printf("NotifyUser value %d\n", n)
 			share <- n
 		}(wg)
 	}

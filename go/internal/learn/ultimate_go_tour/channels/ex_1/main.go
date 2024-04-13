@@ -34,7 +34,7 @@ func main() {
 		goroutine("2", ch)
 	}()
 
-	// Send a value to start the counting.
+	// NotifyUser a value to start the counting.
 	ch <- 0
 
 	// Wait for the program to finish.
