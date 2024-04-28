@@ -7,3 +7,6 @@ Contains problems and solutions as preparation for interviews
 
 ## Typescript
 ./typescript/src/modules
+
+## SQL
+./sql
