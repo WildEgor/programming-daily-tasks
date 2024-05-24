@@ -1,4 +1,4 @@
-package ozon_5_http_check
+package ozon_6_http_check
 
 import (
 	"reflect"
@@ -10,8 +10,8 @@ var tsc = []struct {
 	output []string
 }{
 	{
-		input:  []string{"https://www.google.com", "https://www.yandex.ru"},
-		output: []string{"https://www.google.com - ok", "https://www.yandex.ru - ok"},
+		input:  []string{"https://www.google.com", "https://www.yandex.ru", "https://keklol.com"},
+		output: []string{"https://www.google.com - ok", "https://www.yandex.ru - ok", "https://keklol.com - not ok"},
 	},
 }
 

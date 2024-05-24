@@ -1,9 +1,14 @@
 package ozon_4_meetings
 
+import (
+	"sort"
+)
+
 /*
- @input: [][]int
- @output: [][]int
- @description: Дан массив интервалов, в котором каждый элемент представляет собой массив из двух целых чисел. Ваша задача - объединить все пересекающиеся интервалы в один и вернуть новый массив непересекающихся интервалов.
+input: [][]int
+output: [][]int
+Дан массив интервалов, в котором каждый элемент представляет собой массив из двух целых чисел.
+Ваша задача - объединить все пересекающиеся интервалы в один и вернуть новый массив непересекающихся интервалов.
 */
 
 func merge(intervals [][]int) [][]int {
@@ -13,11 +18,15 @@ func merge(intervals [][]int) [][]int {
 	}
 
 	// Сортируем интервалы по началу
-	quickSort(intervals, 0, len(intervals)-1)
+	sort.Slice(intervals, func(i, j int) bool {
+		return intervals[i][0] < intervals[j][0]
+	})
 
+	// Инициализируем "последний" элемент
 	result := make([][]int, 0)
 	result = append(result, intervals[0])
 
+	// Идем по отсортированному и сравниваем с последним значением
 	for i := 1; i < len(intervals); i++ {
 		last := result[len(result)-1]
 
@@ -29,29 +38,4 @@ func merge(intervals [][]int) [][]int {
 	}
 
 	return result
-}
-
-func quickSort(intervals [][]int, low, high int) {
-	if low < high {
-		pivot := partition(intervals, low, high)
-
-		quickSort(intervals, low, pivot-1)
-		quickSort(intervals, pivot+1, high)
-	}
-}
-
-func partition(intervals [][]int, low, high int) int {
-	pivot := intervals[high][0]
-	i := low
-
-	for j := low; j < high; j++ {
-		if intervals[j][0] < pivot {
-			intervals[i], intervals[j] = intervals[j], intervals[i]
-			i++
-		}
-	}
-
-	intervals[i], intervals[high] = intervals[high], intervals[i]
-
-	return i
 }

@@ -11,23 +11,20 @@ type Counter struct {
 }
 
 func NewCounter() *Counter {
-	data := make(chan int)
-	total := make(chan int)
-
-	c := Counter{data, total}
+	c := &Counter{make(chan int), make(chan int)}
 
 	go func() {
 		var count int
 		for {
 			select {
-			case increment := <-data:
+			case increment := <-c.data:
 				count += increment
-			case total <- count:
+			case c.total <- count:
 			}
 		}
 	}()
 
-	return &c
+	return c
 }
 
 func (c *Counter) Add(v int) {
@@ -42,16 +39,14 @@ func main() {
 	counter := NewCounter()
 
 	var wg sync.WaitGroup
-	wg.Add(1000000)
+	wg.Add(9)
 
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < 9; i++ {
 		go func() {
-			counter.Add(1) // goroutine
-			wg.Done()
+			defer wg.Done()
+			counter.Add(1)
 		}()
 	}
-
-	counter.Add(1) // main goroutine
 
 	wg.Wait()
 

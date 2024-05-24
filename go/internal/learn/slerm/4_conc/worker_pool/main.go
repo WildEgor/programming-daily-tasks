@@ -11,6 +11,7 @@ import (
 
 // Worker represents a worker that can process tasks.
 type Worker struct {
+	id    int
 	ctx   context.Context
 	tasks <-chan string
 	wg    *sync.WaitGroup
@@ -18,8 +19,9 @@ type Worker struct {
 }
 
 // NewWorker creates a new worker.
-func NewWorker(ctx context.Context, wg *sync.WaitGroup, tasks <-chan string, out chan string) *Worker {
+func NewWorker(ctx context.Context, id int, wg *sync.WaitGroup, tasks <-chan string, out chan string) *Worker {
 	return &Worker{
+		id,
 		ctx,
 		tasks,
 		wg,
@@ -30,27 +32,20 @@ func NewWorker(ctx context.Context, wg *sync.WaitGroup, tasks <-chan string, out
 // Run starts the worker.
 func (w *Worker) Run() {
 	go func() {
-		fmt.Println("Starting worker")
 		defer w.wg.Done()
 
+		fmt.Println("Starting worker")
 		select {
-		case <-w.ctx.Done():
-			return
-			// HINT: Так правильно?
+		case t := <-w.tasks:
+			fmt.Printf("Worker %d task=%s\n", w.id, t)
+
+			hasher := md5.New()
+			hasher.Write([]byte(t))
+			hash := hex.EncodeToString(hasher.Sum(nil))
+
+			w.out <- fmt.Sprintf("Task: %s, Hash: %s", t, hash)
 		default:
-			// HINT: Так правильно?
-			for task := range w.tasks {
-				fmt.Printf("Worker task=%s\n", task)
-
-				hasher := md5.New()
-				hasher.Write([]byte(task))
-				hash := hex.EncodeToString(hasher.Sum(nil))
-
-				// Some heavy load
-				time.Sleep(5 * time.Second)
-
-				w.out <- fmt.Sprintf("Task: %s, Hash: %s", task, hash)
-			}
+			return
 		}
 	}()
 }
@@ -75,23 +70,16 @@ func NewWorkerPool(numWorkers int, timeout time.Duration) (*WorkerPool, error) {
 }
 
 // Run starts the worker pool.
-func (wp *WorkerPool) Run() {
+func (wp *WorkerPool) Run(ctx context.Context) {
 	fmt.Println("Start WorkerPool...")
-
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, wp.timeout)
 
 	wp.wg.Add(wp.nw)
 	for i := 0; i < wp.nw; i++ {
-		w := NewWorker(ctx, &wp.wg, wp.tasks, wp.result)
+		w := NewWorker(ctx, i, &wp.wg, wp.tasks, wp.result)
 		w.Run()
 	}
 
-	go func() {
-		wp.wg.Wait()
-		close(wp.result)
-		cancel() // HINT: Насколько правильно вызывать тут ???
-	}()
+	wp.wg.Wait()
 }
 
 // AddTask adds a task to the worker pool.
@@ -103,26 +91,34 @@ func (wp *WorkerPool) AddTask(t string) {
 func (wp *WorkerPool) GetResults() {
 	for {
 		select {
-		case res := <-wp.result:
+		case res, ok := <-wp.result:
+			if !ok {
+				return
+			}
 			fmt.Printf("Result: %s\n", res)
 		default:
-			// HINT: Тут программа зависает будто бы
-			break
+			return
 		}
 	}
 }
 
+func (wp *WorkerPool) Stop() {
+}
+
 func main() {
-	wp, err := NewWorkerPool(3, 100*time.Millisecond)
+	wp, err := NewWorkerPool(3, 15*time.Second)
 	if err != nil {
-		fmt.Errorf("Error creating worker pool: %v", err)
+		fmt.Printf("error creating worker pool: %v", err)
+		return
 	}
 
-	wp.Run()
-
-	wp.AddTask("hello")
-	wp.AddTask("world")
-	wp.AddTask("test")
+	ctx := context.Background()
+	tasks := []string{"hello", "world", "!"}
+	wp.Run(ctx)
+	for _, task := range tasks {
+		wp.AddTask(task)
+	}
+	wp.Stop()
 
 	wp.GetResults()
 }

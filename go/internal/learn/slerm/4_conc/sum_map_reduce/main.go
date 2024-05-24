@@ -37,7 +37,7 @@ func sumChannels(inputs []chan int64) int64 {
 	rc := make(chan int64)
 	var result int64
 
-	wg := new(sync.WaitGroup)
+	var wg sync.WaitGroup
 	wg.Add(len(inputs))
 
 	for _, ch := range inputs {

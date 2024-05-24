@@ -14,19 +14,19 @@ P.S. Да, семафор уже есть в golang встроенный. Его
 Она сложнее той, что предлагается написать вам.
 */
 
-type semType chan struct{}
+type SemType chan struct{}
 
-func NewSemaphore(n int) semType {
-	return make(semType, n)
+func NewSemaphore(n int) SemType {
+	return make(SemType, n)
 }
 
-func (s semType) Acquire(n int) {
+func (s SemType) Acquire(n int) {
 	for i := 0; i < n; i++ {
 		s <- struct{}{}
 	}
 }
 
-func (s semType) Release(n int) {
+func (s SemType) Release(n int) {
 	for i := 0; i < n; i++ {
 		<-s
 	}
@@ -48,20 +48,17 @@ func main() {
 	done := make(chan bool)
 
 	for i := 1; i <= Total; i++ {
+		sem.Acquire(1)
+
 		go func(v int) {
-			sem.Acquire(1)
+			defer sem.Release(1)
 
-			go func() {
-				defer sem.Release(1)
+			process(v)
 
-				process(v)
-
-				// Last task
-				if v == Total {
-					done <- true
-				}
-			}()
-
+			// Last task
+			if v == Total {
+				done <- true
+			}
 		}(i)
 	}
 

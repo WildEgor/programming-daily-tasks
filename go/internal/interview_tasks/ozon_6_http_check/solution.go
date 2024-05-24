@@ -1,7 +1,6 @@
-package ozon_5_http_check
+package ozon_6_http_check
 
 import (
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -27,7 +26,11 @@ func sendRequest(url string, wg *sync.WaitGroup, rCh chan<- result) {
 
 	resp, err := client.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		rCh <- result{
+			url:  url,
+			code: http.StatusInternalServerError,
+		}
+		return
 	}
 	defer resp.Body.Close()
 
@@ -43,12 +46,12 @@ func check(urls []string) []string {
 		return []string{}
 	}
 
-	wg := new(sync.WaitGroup)
+	var wg sync.WaitGroup
 	rCh := make(chan result)
 
 	for _, url := range urls {
 		wg.Add(1)
-		go sendRequest(url, wg, rCh)
+		go sendRequest(url, &wg, rCh)
 	}
 
 	go func() {
