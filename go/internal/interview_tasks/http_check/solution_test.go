@@ -1,4 +1,4 @@
-package ozon_6_http_check
+package http_check
 
 import (
 	"reflect"

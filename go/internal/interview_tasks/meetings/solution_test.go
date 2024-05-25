@@ -1,4 +1,4 @@
-package ozon_4_meetings
+package meetings
 
 import (
 	"reflect"
