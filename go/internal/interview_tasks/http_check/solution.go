@@ -1,6 +1,7 @@
 package http_check
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -12,64 +13,67 @@ import (
 @description: Дан массив URL-адресов. Ваша задача - отправить HTTP-запрос на каждый из них и вернуть массив строк, содержащий статус-коды ответов на запросы.
 */
 
-type result struct {
-	url  string
-	code int
+type RequestResult struct {
+	URL  string
+	Code int
 }
 
-func sendRequest(url string, wg *sync.WaitGroup, rCh chan<- result) {
-	defer wg.Done()
-
-	client := http.Client{
-		Timeout: 5 * time.Second,
+func (rr RequestResult) String() string {
+	sm := "ok"
+	if rr.Code > http.StatusOK {
+		sm = "not ok"
 	}
 
-	resp, err := client.Get(url)
-	if err != nil {
-		rCh <- result{
-			url:  url,
-			code: http.StatusInternalServerError,
-		}
-		return
-	}
-	defer resp.Body.Close()
+	return fmt.Sprintf("%s - %s", rr.URL, sm)
+}
 
-	rCh <- result{
-		url:  url,
-		code: resp.StatusCode,
+type Requester struct {
+	N       int
+	In      chan http.Request
+	Results chan *RequestResult
+	wg      sync.WaitGroup
+}
+
+func NewRequester(n int) *Requester {
+	return &Requester{
+		N:       n,
+		In:      make(chan http.Request, n),
+		Results: make(chan *RequestResult),
 	}
 }
 
-func check(urls []string) []string {
-	// Edge case 1: empty input
-	if len(urls) == 0 {
-		return []string{}
+func (rq *Requester) Do() {
+	rq.wg.Add(rq.N)
+	for range rq.N {
+		go func(wg *sync.WaitGroup) {
+			defer wg.Done()
+
+			for req := range rq.In {
+				client := http.Client{
+					Timeout: 15 * time.Second,
+				}
+
+				resp, err := client.Do(&req)
+				result := RequestResult{
+					URL:  req.URL.String(),
+					Code: http.StatusInternalServerError,
+				}
+				if err != nil {
+					rq.Results <- &result
+					continue
+				}
+				defer resp.Body.Close()
+
+				rq.Results <- &RequestResult{
+					URL:  req.URL.String(),
+					Code: resp.StatusCode,
+				}
+			}
+		}(&rq.wg)
 	}
-
-	var wg sync.WaitGroup
-	rCh := make(chan result)
-
-	for _, url := range urls {
-		wg.Add(1)
-		go sendRequest(url, &wg, rCh)
-	}
-
-	go func() {
-		wg.Wait()
-		close(rCh)
-	}()
-
-	data := make([]string, 0)
-
-	for r := range rCh {
-		if r.code == http.StatusOK {
-			data = append(data, r.url+" - ok")
-		} else {
-			data = append(data, r.url+" - not ok")
-		}
-	}
-
-	return data
 }
 
-var Solution = check
+func (rq *Requester) Done() {
+	rq.wg.Wait()
+	close(rq.Results)
+}
