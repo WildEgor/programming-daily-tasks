@@ -2,26 +2,22 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"sync"
 )
 
 func joinChannels(chs ...<-chan int) <-chan int {
 	out := make(chan int)
+	var wg sync.WaitGroup
+	wg.Add(len(chs))
 
 	go func() {
-		var wg sync.WaitGroup
-
-		wg.Add(len(chs))
-
 		for _, ch := range chs {
-			go func(ch <-chan int, wg *sync.WaitGroup) {
+			go func(ch <-chan int) {
 				defer wg.Done()
-
 				for v := range ch {
 					out <- v
 				}
-			}(ch, &wg)
+			}(ch)
 		}
 
 		wg.Wait()
@@ -43,19 +39,6 @@ func spawn() <-chan int {
 	return ch
 }
 
-func binaryToDecimal(binary []int) int {
-	decimal := 0
-	length := len(binary)
-
-	for i, bit := range binary {
-		if bit == 1 {
-			// The power of 2 for the current bit position is calculated as (length-1)-i
-			decimal += int(math.Pow(2, float64((length-1)-i)))
-		}
-	}
-	return decimal
-}
-
 func main() {
 	chA := spawn()
 	chB := spawn()
@@ -68,5 +51,5 @@ func main() {
 		r = append(r, v)
 	}
 
-	fmt.Println(binaryToDecimal(r))
+	fmt.Println(r)
 }

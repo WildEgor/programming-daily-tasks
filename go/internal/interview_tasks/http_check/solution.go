@@ -7,14 +7,9 @@ import (
 	"time"
 )
 
-/**
-@input: []string
-@output: []string
-@description: Дан массив URL-адресов. Ваша задача - отправить HTTP-запрос на каждый из них и вернуть массив строк, содержащий статус-коды ответов на запросы.
-*/
-
 type RequestResult struct {
-	URL  string
+	URL string
+	// Body []byte
 	Code int
 }
 
@@ -23,57 +18,59 @@ func (rr RequestResult) String() string {
 	if rr.Code > http.StatusOK {
 		sm = "not ok"
 	}
-
 	return fmt.Sprintf("%s - %s", rr.URL, sm)
 }
 
-type Requester struct {
-	N       int
-	In      chan http.Request
-	Results chan *RequestResult
-	wg      sync.WaitGroup
+type RequestManager struct {
+	wg  sync.WaitGroup
+	OUT chan *RequestResult
 }
 
-func NewRequester(n int) *Requester {
-	return &Requester{
-		N:       n,
-		In:      make(chan http.Request, n),
-		Results: make(chan *RequestResult),
+func NewRequestManager() *RequestManager {
+	return &RequestManager{
+		OUT: make(chan *RequestResult),
 	}
 }
 
-func (rq *Requester) Do() {
-	rq.wg.Add(rq.N)
-	for range rq.N {
-		go func(wg *sync.WaitGroup) {
-			defer wg.Done()
-
-			for req := range rq.In {
-				client := http.Client{
-					Timeout: 15 * time.Second,
-				}
-
-				resp, err := client.Do(&req)
-				result := RequestResult{
-					URL:  req.URL.String(),
-					Code: http.StatusInternalServerError,
-				}
-				if err != nil {
-					rq.Results <- &result
-					continue
-				}
-				defer resp.Body.Close()
-
-				rq.Results <- &RequestResult{
-					URL:  req.URL.String(),
-					Code: resp.StatusCode,
-				}
-			}
-		}(&rq.wg)
+func (rm *RequestManager) Run(reqs []*http.Request) {
+	rm.wg.Add(len(reqs))
+	for i := 0; i < len(reqs); i++ {
+		go rm.fetchURL(reqs[i])
 	}
+
+	go func() {
+		rm.wg.Wait()
+		close(rm.OUT)
+	}()
 }
 
-func (rq *Requester) Done() {
-	rq.wg.Wait()
-	close(rq.Results)
+func (rm *RequestManager) fetchURL(req *http.Request) {
+	defer rm.wg.Done()
+
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	rr := &RequestResult{
+		URL:  req.URL.String(),
+		Code: http.StatusInternalServerError,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		rm.OUT <- rr
+		return
+	}
+
+	//result, err := io.ReadAll(resp.Body)
+	//defer resp.Body.Close()
+	//if err != nil {
+	//	rm.OUT <- rr
+	//	return
+	//}
+	//
+	//rr.Body = result
+	rr.Code = resp.StatusCode
+
+	rm.OUT <- rr
 }

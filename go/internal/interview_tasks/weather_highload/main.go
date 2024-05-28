@@ -11,7 +11,7 @@ import (
 
 // HINT: https://youtu.be/R68oxsnnJBE?si=v6ye3VXcHv33mXtA
 // RPS?
-// Cache for N day?
+// Cache for n day?
 
 // Update weather async
 
