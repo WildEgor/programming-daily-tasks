@@ -46,29 +46,20 @@ func removeIndex(s []int, index int) []int {
 
 func kSumBinarySearch(nums []int, k int) [][]int {
 	r := make([][]int, 0)
-	pairs := make(map[[2]int]struct{})
 
 	sort.Ints(nums) // HINT: sort nums ASC
 
 	for i := 0; i < len(nums); i++ {
-		base := nums[i]            // HINT: ex. k = 5 and nums[i] = -5. 5 - (-5) = 10, so find 10
-		in := removeIndex(nums, i) // HINT: remove nums[i] from base
+		base := nums[i]                       // HINT: ex. k = 5 and nums[i] = -5. 5 - (-5) = 10, so find 10
+		in := append(nums[:i], nums[i+1:]...) // HINT: remove nums[i] from base
+		fe := k - base
 
-		le, exists := bs(in, k-nums[i])
+		le, exists := bs(in, fe)
 		if !exists {
 			continue
 		}
 
-		// HINT: stupid, to remove duplicates
-		pair := [2]int{base, le}
-		if base > le {
-			pair = [2]int{le, base}
-		}
-
-		if _, seen := pairs[pair]; !seen {
-			pairs[pair] = struct{}{}
-			r = append(r, []int{pair[0], pair[1]})
-		}
+		r = append(r, []int{base, le})
 	}
 
 	return r
