@@ -14,7 +14,7 @@ func (s *Stack) Push(e interface{}) {
 
 // Pop removes the last element in the stack and returns it
 func (s *Stack) Pop() interface{} {
-	if len(s.elements) == 0 {
+	if s.Empty() {
 		return nil
 	}
 	e := s.elements[len(s.elements)-1]
@@ -22,9 +22,9 @@ func (s *Stack) Pop() interface{} {
 	return e
 }
 
-// Peek returns the last element in the stack without removing it
-func (s *Stack) Peek() interface{} {
-	if len(s.elements) == 0 {
+// Top returns the last element in the stack without removing it
+func (s *Stack) Top() interface{} {
+	if s.Empty() {
 		return nil
 	}
 	return s.elements[len(s.elements)-1]

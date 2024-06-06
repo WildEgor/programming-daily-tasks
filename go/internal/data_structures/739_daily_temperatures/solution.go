@@ -14,15 +14,15 @@ func dailyTemperatures(temperatures []int) []int {
 	result := make([]int, len(temperatures), len(temperatures))
 
 	for i := len(temperatures) - 1; i >= 0; i-- {
-		for !stack.Empty() && temperatures[i] >= temperatures[stack.Peek().(int)] {
+		for !stack.Empty() && temperatures[i] >= temperatures[stack.Top().(int)] {
 			stack.Pop()
 		}
 
 		if stack.Empty() {
 			result[i] = 0
 		} else {
-			// stack.Peek() is the index of the next warmer temperature
-			result[i] = stack.Peek().(int) - i
+			// stack.Top() is the index of the next warmer temperature
+			result[i] = stack.Top().(int) - i
 		}
 
 		stack.Push(i)
