@@ -2,19 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/wildegor/daily_tasks/go/internal/patterns/timeout/timeout"
+	"github.com/wildegor/daily_tasks/go/internal/patterns/timeout/utils_timeout"
 	"time"
 )
 
-func someHandler() error {
+func doJob() error {
+	// Simulate work
 	time.Sleep(3 * time.Second)
-	fmt.Sprintf("result: %v", true)
+	fmt.Println("OK!")
 	return nil
 }
 
 func main() {
-	err := timeout.WithTimeout(2*time.Second, someHandler) // Change timeout to 4 seconds to prevent timeout
-	if err != nil {
+	// Change timeout to 4 seconds to prevent timeout
+	if err := utils_timeout.WithTimeout(4*time.Second, doJob); err != nil {
 		fmt.Println(err)
 	}
 }

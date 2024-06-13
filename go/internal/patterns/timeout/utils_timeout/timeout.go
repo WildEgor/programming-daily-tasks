@@ -1,4 +1,4 @@
-package timeout
+package utils_timeout
 
 import (
 	"errors"
@@ -8,6 +8,10 @@ import (
 func WithTimeout(dur time.Duration, f func() error) error {
 	var err error
 	done := make(chan struct{})
+	ticker := time.NewTicker(dur)
+	defer ticker.Stop()
+
+	// Call callback in goroutine
 	go func() {
 		err = f()
 		close(done)
@@ -16,7 +20,7 @@ func WithTimeout(dur time.Duration, f func() error) error {
 	select {
 	case <-done:
 		return err
-	case <-time.After(dur):
+	case <-ticker.C:
 		return errors.New("timeout")
 	}
 }

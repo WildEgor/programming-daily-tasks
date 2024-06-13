@@ -15,7 +15,7 @@ type Worker struct {
 	ctx   context.Context
 	tasks <-chan string
 	wg    *sync.WaitGroup
-	out   chan string
+	out   chan<- string
 }
 
 // NewWorker creates a new worker.

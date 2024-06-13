@@ -6,17 +6,23 @@ import (
 )
 
 // 1 шаг - убирает лишние пробелы в строках
-func step1(in <-chan string, out chan<- string) {
+func step1(in <-chan string) <-chan string {
+	out := make(chan string)
+
 	go func() {
 		defer close(out)
 		for v := range in {
 			out <- strings.Join(strings.Fields(v), " ")
 		}
 	}()
+
+	return out
 }
 
 // 2 шаг - делит строки на предложения (на основе разделителя “точка”). Саму точку не добавляйте в результат.
-func step2(in <-chan string, out chan<- string) {
+func step2(in <-chan string) <-chan string {
+	out := make(chan string)
+
 	go func() {
 		defer close(out)
 		for v := range in {
@@ -28,6 +34,8 @@ func step2(in <-chan string, out chan<- string) {
 			}
 		}
 	}()
+
+	return out
 }
 
 // 3 шаг - принимает “предложения”, и в каждом предложении первые символ делает заглавным.
@@ -63,20 +71,13 @@ func generateSentences(strs []string) <-chan string {
 }
 
 func pipeline(in <-chan string) <-chan string {
-	outStep1 := make(chan string)
-	outStep2 := make(chan string)
-
-	step1(in, outStep1)
-	step2(outStep1, outStep2)
-	outStep3 := step3(outStep2)
-
-	return outStep3
+	return step3(step2(step1(in)))
 }
 
 func main() {
 	in := generateSentences([]string{
-		"Hello World.  How are  you?",
-		"Hi there! I am fine.   And you?",
+		"Hello World.  how are  you?",
+		"Hi there! I am fine.   and you?",
 	})
 	out := pipeline(in)
 
