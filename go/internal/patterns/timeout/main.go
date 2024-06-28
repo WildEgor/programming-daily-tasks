@@ -8,14 +8,14 @@ import (
 
 func doJob() error {
 	// Simulate work
-	time.Sleep(3 * time.Second)
+	time.Sleep(2999 * time.Millisecond)
 	fmt.Println("OK!")
 	return nil
 }
 
 func main() {
 	// Change timeout to 4 seconds to prevent timeout
-	if err := utils_timeout.WithTimeout(4*time.Second, doJob); err != nil {
+	if err := utils_timeout.WithTimeout(3*time.Second, doJob); err != nil {
 		fmt.Println(err)
 	}
 }
